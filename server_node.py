@@ -1,13 +1,29 @@
 #!/usr/bin/env python3
 import socket
 import os
+import sys
 import django
+
+# Add the sync_project directory to Python's path so it can find 'sync_project.settings'
+sys.path.append(os.path.join(os.path.dirname(__file__), 'sync_project'))
 
 # Setup Django environment so we can use the models
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sync_project.settings')
 django.setup()
 
 from dashboard.models import SyncLog
+
+# Using Caesar Cipher Decryption
+SECRET_KEY = 5
+def caesar_decrypt(text, shift=SECRET_KEY):
+    decrypted = ""
+    for char in text:
+        if char.isalpha():
+            start = ord('A') if char.isupper() else ord('a')
+            decrypted += chr((ord(char) - start - shift) % 26 + start)
+        else:
+            decrypted += char
+    return decrypted
 
 def log_to_db(orig_name, enc_name, size):
     # Creating a new instance of our model object[cite: 2, 3]
@@ -25,9 +41,9 @@ def start_server():
     backup_dir = 'Cloud_Backup'
     
     if not os.path.exists(backup_dir):
-        os.makedirs(backup_dir)[cite: 5]
+        os.makedirs(backup_dir) # [cite: 5]
         
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)[cite: 4]
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # [cite: 4]
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((host, port))
     s.listen(5)
@@ -35,26 +51,28 @@ def start_server():
     print(f"Server is listening for files on {host}:{port}...")
     
     while True:
-        conn, addr = s.accept()[cite: 4]
+        conn, addr = s.accept() # [cite: 4]
         print(f"Connected by {addr}")
         
         # Receive encrypted file name
         file_name = conn.recv(1024).decode()
-        print(f"Receiving file: {file_name}")
+        original_name = caesar_decrypt(file_name)
+        print(f"Receiving file: {file_name} (Original: {original_name})")
         
-        # Open file and write binary data[cite: 1, 5]
+        # Open file and write binary data
         file_path = os.path.join(backup_dir, file_name)
         with open(file_path, 'wb') as f:
             while True:
-                data = conn.recv(1024)[cite: 4]
+                data = conn.recv(1024) # [cite: 4]
                 if not data:
                     break
                 f.write(data)
         
         # ADDED: Get metadata and log to Django Database
         f_size = os.path.getsize(file_path)
+        
         # For this lab, we use the encrypted name for both fields unless you send the original name separately
-        log_to_db("Unknown (Encrypted)", file_name, f_size)
+        log_to_db(original_name, file_name, f_size)
         
         print(f"File {file_name} received, saved, and logged to database.")
         conn.close()

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>SyncGuard Dashboard</title></head>
+<body>
+    <h1>SyncGuard: Personal Cloud Logs</h1>
+    <table border="1">
+        <tr>
+            <th>Original Name</th>
+            <th>Encrypted Name (Caesar)</th> 
+            <th>Size (Bytes)</th>
+            <th>Sync Time</th>
+        </tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.original_name }}</td>
+            <td>{{ log.encrypted_name }}</td>
+            <td>{{ log.file_size }}</td>
+            <td>{{ log.timestamp }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

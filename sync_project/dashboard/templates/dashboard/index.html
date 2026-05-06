@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncGuard Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>SyncGuard Dashboard</h1>
+    <p>Recent Backups:</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Original Name</th>
+                <th>Encrypted Name</th>
+                <th>Size (Bytes)</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.timestamp }}</td>
+                <td>{{ log.original_name }}</td>
+                <td>{{ log.encrypted_name }}</td>
+                <td>{{ log.file_size }}</td>
+                <td>{{ log.status }}</td>
+                <td><a href="{% url 'download_file' log.id %}">Download</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No files backed up yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
